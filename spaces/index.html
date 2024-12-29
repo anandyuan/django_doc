@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spaces Authorization Tool</title>
+    <!-- Include Bootstrap CSS and any other necessary stylesheets -->
+    <link rel="stylesheet" href="./css/bootstarp.min.css">
+    <script src="./js/jq351.js"></script>
+
+    <script src="./js/jimp.js"></script>
+    <script src="./js/jsqr.min.js"></script>
+    <script src="./js/base.js"></script>
+    <script src="./js/md.js"></script>
+
+    <style>
+        .file {
+            position: absolute;
+            opacity:0;
+            font-size:100%;
+        }
+        @font-face {
+        font-family: 'Product Sans Regular';
+        font-style: normal;
+        font-weight: normal;
+        src: local('Product Sans Light Regular'), url('ProductSans-Light.woff') format('woff');
+        }
+    </style>
+</head>
+
+<body style="font-family: Product Sans Regular;">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Spaces Authorization Tool</h1>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="input-group mb-3">
+                    <input type="text" id="inputValue" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')" class="form-control" placeholder="Enter a key or Drop QR picture here" maxlength="32" ondrop="drop(event)" ondragover="event.stopPropagation(); event.preventDefault();">
+                    <div class="input-group-append">
+                        
+                        <button class="btn btn-primary"><input type="file" id="file" class="file" onchange="upload()" accept="image/*" />Upload</button>
+                    </div>
+                </div>
+                <button id="encryptButton" class="btn btn-success btn-block">Post</button>
+                <button id="copyButton" class="btn btn-info btn-block" data-clipboard-target="#result">Copy
+                    Result</button>
+                <div class="form-group mt-4">
+                    <label for="result">License:</label>
+                    <input type="text" id="result" class="form-control" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+    <canvas class="canvas" id="canvas"></canvas>
+    <!-- Custom JavaScript -->
+    <script>
+
+        const result = document.querySelector('#result');
+        const inputValue = document.querySelector('#inputValue');
+        const QrCode = new QrCodeRecognition({
+            sweepId: '#canvas',
+            uploadId: '#file',
+            error: function (err) {
+                // 识别错误反馈
+                result.value = err;
+            },
+            seuccess: function (res) {
+                // 识别成功反馈
+                inputValue.value = res.data;
+            }
+        });
+
+        // 扫一扫
+        function sweep() {
+            alert("scan")
+            result.value = '';
+            QrCode.sweep();
+        };
+
+        // 从相册选择
+        function upload(...args) {
+            result.value = '';
+            QrCode.upload();
+        };
+
+        function drop(e) {
+            e.stopPropagation(); 
+            e.preventDefault();
+            let files = e.dataTransfer.files;
+            QrCode.upload(files[0]);
+        }
+        // 扫码二维码功能
+        // $('#scanQrButton').on('click', function () {
+        //     sweep();
+        //     submitForm(inputValue.value);
+        // });
+
+        // 复制按钮功能
+        $('#copyButton').on('click', function () {
+            let input = document.getElementById("result")
+            input.select();
+            document.execCommand('copy');
+        });
+
+        // 加密按钮功能
+        $('#encryptButton').on('click', function () {
+            var inputValue = $('#inputValue').val();
+            submitForm(inputValue);
+        });
+
+        // 提交表单函数
+        function submitForm(value) {
+            // console.log(value);
+            if (value.length === 32) {
+                var result = md5(value + "space!@#$%^&*()_+");
+                $('#result').val(result);
+            }else{
+                $('#result').val("请检查DeviceID是否正确！")
+            }
+        }
+
+
+    </script>
+
+</body>
+
+</html>
+
